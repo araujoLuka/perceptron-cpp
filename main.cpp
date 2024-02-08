@@ -9,8 +9,29 @@
 static const char *const FILE_NAME{"./data/iris.data"};
 static constexpr float LEARNING_RATE{1};
 
-int main (int argc, char *argv[]) {
-    int seed{argc > 1 ? std::stoi(argv[1]) : 0};
+void printHelp() {
+    std::cout << "Usage: ./program [seed]" << std::endl;
+    std::cout << "  seed: Optional seed for random number generation. If not provided, default seed is used." << std::endl;
+}
+
+int main(int argc, char *argv[]) {
+    int seed{0};
+    if (argc > 1) {
+        if (std::string{argv[1]} == "-h" || std::string{argv[1]} == "--help") {
+            printHelp();
+            return 0;
+        }
+
+        try {
+            seed = std::stoi(argv[1]);
+        } catch (const std::invalid_argument &e) {
+            std::cerr << "Invalid seed provided. Please provide a valid seed." << std::endl;
+            return -1;
+        } catch (const std::out_of_range &e) {
+            std::cerr << "Seed out of range. Please provide a valid seed." << std::endl;
+            return -2;
+        }
+    }
 
     std::vector<std::vector<float>> *trainingData{new std::vector<std::vector<float>>};
     std::vector<int> *labels{new std::vector<int>};
@@ -55,7 +76,7 @@ int main (int argc, char *argv[]) {
     std::cout << "Input size: " << 4 << std::endl;
 
     std::cout << "Training serial perceptron..." << std::endl;
-    
+
     // Measure the time it takes to fit the perceptron with chrono
     time = std::chrono::system_clock::now();
     perceptron.fit(*trainingData, *labels, 1000); // 1000 epochs
