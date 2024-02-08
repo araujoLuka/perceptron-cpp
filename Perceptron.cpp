@@ -1,3 +1,7 @@
+// Author: Lucas Araujo
+// Date: February 2024
+// Description: Scalar Perceptron implementation
+
 #include "Perceptron.hpp"
 
 #include <iomanip>
@@ -5,15 +9,19 @@
 
 namespace ml {
 
-Perceptron::Perceptron(const float leaningRate, const int inputSize)
-    : learningRate{leaningRate}, inputSize{inputSize}, totalEpochs{0} {
-    for (int i{0}; i < inputSize + 1; ++i) this->weights.push_back((float)rand() / (float)RAND_MAX);
+Perceptron::Perceptron(const float learningRate, const int inputSize)
+    : learningRate{learningRate}, inputSize{inputSize}, totalEpochs{0} {
+    // Initialize weights with random values between 0 and 1
+    for (int i{0}; i < inputSize + 1; ++i) 
+        this->weights.push_back(static_cast<float>(rand()) / static_cast<float>(RAND_MAX));
 }
 
-Perceptron::Perceptron(const float leaningRate, const int inputSize, const int seed)
-    : learningRate{leaningRate}, inputSize{inputSize}, totalEpochs{0} {
+Perceptron::Perceptron(const float learningRate, const int inputSize, const int seed)
+    : learningRate{learningRate}, inputSize{inputSize}, totalEpochs{0} {
+    // Initialize weights with random values between 0 and 1 using the provided seed for reproducibility
     srand(seed);
-    for (int i{0}; i < inputSize + 1; ++i) this->weights.push_back((float)rand() / (float)RAND_MAX);
+    for (int i{0}; i < inputSize + 1; ++i) 
+        this->weights.push_back(static_cast<float>(rand()) / static_cast<float>(RAND_MAX));
 }
 
 const std::vector<float> Perceptron::getWeights() { return this->weights; }
@@ -22,24 +30,22 @@ const int Perceptron::getInputSize() { return this->inputSize; }
 const int Perceptron::getTotalEpochs() { return this->totalEpochs; }
 
 const float Perceptron::activation(const std::vector<float>& input) {
-    float scalarProduct{0};
+    float scalarProduct = this->weights[0]; // Initialize with the bias
 
-    // Add the bias to scalarProduct
-    scalarProduct += this->weights[0];
-
-    /* As defined in linear algebra:
-     * - Definition. Given two real-valued (column) vectors u, v (both from R^n) the scalar product
-     *   is the matrix-matrix multiplication -> u^T * v = SUM(u_i * v_i) from i=1 to n
-     */
+    // Calculate the scalar product of inputs and weights
     for (int i{0}; i < this->inputSize; ++i) 
         scalarProduct += input[i] * this->weights[i + 1];
 
     return scalarProduct;
 }
 
-const int Perceptron::predict(const std::vector<float>& input) { return this->activation(input) >= 0 ? 1 : -1; }
+const int Perceptron::predict(const std::vector<float>& input) { 
+    return this->activation(input) >= 0 ? 1 : -1; 
+}
 
-const int Perceptron::predict(const float scalarProduct) { return scalarProduct >= 0 ? 1 : -1; }
+const int Perceptron::predict(const float scalarProduct) { 
+    return scalarProduct >= 0 ? 1 : -1; 
+}
 
 void Perceptron::fit(const std::vector<std::vector<float>>& trainingData, const std::vector<int>& labels, const int epochs) {
     for (int epoch{0}; epoch < epochs; ++epoch) {
@@ -52,18 +58,18 @@ void Perceptron::fit(const std::vector<std::vector<float>>& trainingData, const 
         std::cout << "| ";
 
         // Count the number of misclassified samples
-        // If the count is 0, the perceptron has learned and we can stop training
+        // If the count is 0, the perceptron has learned, and we can stop training
         int misclassifiedCount{0};
         for (std::size_t i{0}; i < trainingData.size(); ++i) {
             float scalarProduct{this->activation(trainingData[i])};
             int prediction{this->predict(scalarProduct)};
             int label{labels[i]};
-            // using criterion as suggested by bishop
-            // only update weights if prediction is wrong
+            // Using criterion as suggested by Bishop
+            // Only update weights if prediction is wrong
             if (prediction != label) {
                 misclassifiedCount++;
-                // We can multiply the learning rate by the label and the operation will be inverted to the correct one
-                // If the label is 1, the learning rate will be positive, otherwise it will be negative
+                // We can multiply the learning rate by the label, and the operation will be inverted to the correct one
+                // If the label is 1, the learning rate will be positive; otherwise, it will be negative
                 float learningRate{this->learningRate * label};
                 this->weights[0] += learningRate;
                 for (int j{0}; j < this->inputSize; ++j)
@@ -87,3 +93,4 @@ void Perceptron::fit(const std::vector<std::vector<float>>& trainingData, const 
 }
 
 }  // namespace ml
+
