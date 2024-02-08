@@ -1,0 +1,4 @@
+perceptron
+*.o
+
+refs.txt

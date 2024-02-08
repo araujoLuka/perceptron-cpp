@@ -1,12 +1,18 @@
 #include "Perceptron.hpp"
 
+#include <iomanip>
 #include <iostream>
 
 namespace ml {
 
-Perceptron::Perceptron(const int inputSize, const float leaningRate)
+Perceptron::Perceptron(const float leaningRate, const int inputSize)
     : learningRate{leaningRate}, inputSize{inputSize}, totalEpochs{0} {
-    srand(time(NULL));
+    for (int i{0}; i < inputSize + 1; ++i) this->weights.push_back((float)rand() / (float)RAND_MAX);
+}
+
+Perceptron::Perceptron(const float leaningRate, const int inputSize, const int seed)
+    : learningRate{leaningRate}, inputSize{inputSize}, totalEpochs{0} {
+    srand(seed);
     for (int i{0}; i < inputSize + 1; ++i) this->weights.push_back((float)rand() / (float)RAND_MAX);
 }
 
@@ -38,10 +44,12 @@ const int Perceptron::predict(const float scalarProduct) { return scalarProduct 
 void Perceptron::fit(const std::vector<std::vector<float>>& trainingData, const std::vector<int>& labels, const int epochs) {
     for (int epoch{0}; epoch < epochs; ++epoch) {
         // Visualize the training process
-        std::cout << "Epoch: " << epoch + 1 << '/' << epochs << '\n';
+        std::cout << "Epoch: " << epoch + 1 << '/' << epochs << " | ";
         std::cout << "Initial weights: ";
-        for (int i{0}; i < 5; ++i) std::cout << this->weights[i] << " ";
-        std::cout << '\n';
+        for (int i{0}; i <= this->inputSize; ++i)
+            std::cout << std::fixed << std::setw(9) << std::setprecision(5) 
+                << this->weights[i] << ' ';
+        std::cout << "| ";
 
         // Count the number of misclassified samples
         // If the count is 0, the perceptron has learned and we can stop training
@@ -63,10 +71,12 @@ void Perceptron::fit(const std::vector<std::vector<float>>& trainingData, const 
             }
         }
         // Visualize the training process
-        std::cout << "Misclassified: " << misclassifiedCount << '\n';
+        std::cout << "Misclassified: " << misclassifiedCount << " | ";
         std::cout << "Final weights: ";
-        for (int i{0}; i < 5; ++i) std::cout << this->weights[i] << " ";
-        std::cout << "\n\n";
+        for (int i{0}; i <= this->inputSize; ++i)
+            std::cout << std::fixed << std::setw(9) << std::setprecision(5) 
+                << this->weights[i] << ' ';
+        std::cout << "\n";
 
         // If the perceptron has learned, we can stop training
         if (misclassifiedCount == 0) {

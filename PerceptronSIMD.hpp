@@ -1,30 +1,33 @@
 // Author: Lucas Araujo
 // Date: February 2024
-// Description: Scalar Perceptron implementation
+// Description: SIMD Perceptron implementation
 
-#ifndef PERCEPTRON_HPP
-#define PERCEPTRON_HPP
+#ifndef PERCEPTRON_SIMD_HPP
+#define PERCEPTRON_SIMD_HPP
 
-#include <vector>
+#include "Perceptron.hpp"
+#include <immintrin.h>
 
 namespace ml { // means machine learning
 
-class Perceptron {
+class PerceptronSIMD {
 public:
-    Perceptron(const float learningRate, const int inputSize);
-    Perceptron(const float learningRate, const int inputSize, const int seed);
-    virtual ~Perceptron() = default;
+    PerceptronSIMD(const float learningRate, const int inputSize);
+    PerceptronSIMD(const float learningRate, const int inputSize, const int seed);
+    virtual ~PerceptronSIMD() = default;
 
     /* Getters */
-    const std::vector<float> getWeights();
     const float getLearningRate();
     const int getInputSize();
     const int getTotalEpochs();
+    const float getBiasWeight();
+    const __m128 getWeights();
+    const std::vector<float> getWeightsVector();
 
     /* Activation function
      * > Calculate the scalar product from inputs and weights
      */
-    virtual const float activation(const std::vector<float>& inputs);
+    const float activation(const std::vector<float>& inputs);
 
     /* Prediction function
      * > Uses the activation function to predict the output
@@ -39,15 +42,18 @@ public:
     /* Training function
      * > Finds the ideal weights for the perceptron to make accurate predictions
      */
-    virtual void fit(const std::vector<std::vector<float>>& trainingData, const std::vector<int>& labels, const int epochs);
+    void fit(const std::vector<std::vector<float>>& trainingData, const std::vector<int>& labels, const int epochs);
 
 private:
+    const float activation(const __m128& input);
+
     float learningRate;
     int inputSize;
     int totalEpochs;
-    std::vector<float> weights;
+    float biasWeight;
+    __m128 weightsSIMD;
 };
 
 } // namespace ml
 
-#endif // !PERCEPTRON_HPP
+#endif // !PERCEPTRON_SIMD_HPP
