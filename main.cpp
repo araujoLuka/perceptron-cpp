@@ -68,5 +68,8 @@ int main (int argc, char *argv[]) {
     std::cout << "Prediction: " << perceptron.predict(std::vector<float>{5.9, 3.0, 5.1, 1.8}) << std::endl;
     std::cout << "Correct: -1" << std::endl;
 
+    delete trainingData;
+    delete labels;
+
     return 0;
 }
