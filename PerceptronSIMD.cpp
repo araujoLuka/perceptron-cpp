@@ -45,10 +45,16 @@ const float PerceptronSIMD::activation(const std::vector<float>& input) {
 
 // Private activation function for SIMD processing
 const float PerceptronSIMD::activation(const __m128& input) {
-    // Perform SIMD multiplication and sum
+    // Perform SIMD multiplication
     __m128 mul{_mm_mul_ps(this->weightsSIMD, input)};
-    float scalarProduct{0};
-    scalarProduct += mul[0] + mul[1] + mul[2] + mul[3];
+
+    // Perform horizontal addition
+    __m128 sum1{_mm_hadd_ps(mul, mul)};
+    __m128 sum2{_mm_hadd_ps(sum1, sum1)};
+
+    // Extract the result from the sum
+    float scalarProduct{_mm_cvtss_f32(sum2)};
+
     // Add bias weight
     return scalarProduct + this->biasWeight;
 }

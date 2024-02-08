@@ -1,4 +1,4 @@
-parametrosCompilacao=-Wall
+parametrosCompilacao=-Wall -O3 -msse3
 nomePrograma=perceptron
 objetos=$(patsubst %.cpp, %.o, $(wildcard *.cpp))
 
