@@ -8,7 +8,7 @@
 #include "Perceptron.hpp"
 #include <immintrin.h>
 
-namespace ml { // means machine learning
+namespace ml {
 
 class PerceptronSIMD {
 public:
@@ -16,7 +16,7 @@ public:
     PerceptronSIMD(const float learningRate, const int inputSize, const int seed);
     virtual ~PerceptronSIMD() = default;
 
-    /* Getters */
+    // Getters
     const float getLearningRate();
     const int getInputSize();
     const int getTotalEpochs();
@@ -24,36 +24,30 @@ public:
     const __m128 getWeights();
     const std::vector<float> getWeightsVector();
 
-    /* Activation function
-     * > Calculate the scalar product from inputs and weights
-     */
+    // Activation function
     const float activation(const std::vector<float>& inputs);
 
-    /* Prediction function
-     * > Uses the activation function to predict the output
-     */
+    // Prediction function
     const int predict(const std::vector<float>& inputs);
 
-    /* Prediction function
-    * > Uses the activation function with the before calculated scalar product to predict the output
-     */
+    // Prediction function
     const int predict(const float scalarProduct);
 
-    /* Training function
-     * > Finds the ideal weights for the perceptron to make accurate predictions
-     */
+    // Training function
     void fit(const std::vector<std::vector<float>>& trainingData, const std::vector<int>& labels, const int epochs);
 
 private:
+    // Helper function to calculate activation using SIMD
     const float activation(const __m128& input);
 
     float learningRate;
     int inputSize;
     int totalEpochs;
-    float biasWeight;
-    __m128 weightsSIMD;
+    float biasWeight;       // Separated bias weight for SIMD
+    __m128 weightsSIMD;     // Using SIMD 4-floats vector
 };
 
 } // namespace ml
 
 #endif // !PERCEPTRON_SIMD_HPP
+
