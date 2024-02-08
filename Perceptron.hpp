@@ -1,3 +1,7 @@
+// Author: Lucas Araujo
+// Date: February 2024
+// Description: Scalar Perceptron implementation
+
 #ifndef PERCEPTRON_HPP
 #define PERCEPTRON_HPP
 
@@ -7,35 +11,36 @@ namespace ml { // means machine learning
 
 class Perceptron {
 public:
-    Perceptron(int inputSize, float leaningRate);
+    Perceptron(const int inputSize, const float leaningRate);
     virtual ~Perceptron() = default;
 
     /* Getters */
-    std::vector<float> getWeights();
+    const std::vector<float> getWeights();
+    const float getLearningRate();
+    const int getInputSize();
+    const int getTotalEpochs();
 
     /* Activation function
      * > Calculate the scalar product from inputs and weights
      */
-    float activation(std::vector<float> inputs);
+    const float activation(const std::vector<float>& inputs);
 
     /* Prediction function
      * > Uses the activation function to predict the output
      */
-    int predict(std::vector<float> inputs);
+    const int predict(const std::vector<float>& inputs);
 
     /* Prediction function
     * > Uses the activation function with the before calculated scalar product to predict the output
      */
-    int predict(float scalarProduct);
+    const int predict(const float scalarProduct);
 
     /* Training function
      * > Finds the ideal weights for the perceptron to make accurate predictions
      */
-    void fit(std::vector<std::vector<float>> trainingData, std::vector<int> labels, int epochs);
+    void fit(const std::vector<std::vector<float>>& trainingData, const std::vector<int>& labels, const int epochs);
 
 private:
-    static constexpr int BIAS{1};
-
     float learningRate;
     int inputSize;
     int totalEpochs;

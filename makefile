@@ -11,4 +11,7 @@ $(nomePrograma): $(objetos)
 	g++ -c $< $(parametrosCompilacao)
 
 clean:
-	rm -f *.o $(nomePrograma)
+	rm -f *.o
+
+purge: clean
+	rm -f $(nomePrograma)

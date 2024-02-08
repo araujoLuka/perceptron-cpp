@@ -4,7 +4,8 @@
 #include <vector>
 #include "Perceptron.hpp"
 
-static const char *const FILE_NAME{"./iris.data"};
+static const char *const FILE_NAME{"./data/iris.data"};
+static constexpr float LEARNING_RATE{1};
 
 int main (int argc, char *argv[]) {
     std::vector<std::vector<float>> *trainingData{new std::vector<std::vector<float>>};
@@ -43,13 +44,18 @@ int main (int argc, char *argv[]) {
     std::cout << "Labels: " << labels->size() << std::endl;
 
     // ml::Perceptron perceptron{4, 0.01}; // 4 inputs, learning rate 0.01
-    ml::Perceptron perceptron{4, 1}; // 4 inputs, learning rate 1
+    // ml::Perceptron perceptron{4, 1}; // 4 inputs, learning rate 1
+    ml::Perceptron perceptron{4, LEARNING_RATE};
+
+    std::cout << "Learning rate: " << perceptron.getLearningRate() << std::endl;
+    std::cout << "Input size: " << perceptron.getInputSize() << std::endl;
 
     // Measure the time it takes to fit the perceptron
     float time{0};
     perceptron.fit(*trainingData, *labels, 1000); // 1000 epochs
     time = clock() - time;
     std::cout << "Time: " << time / CLOCKS_PER_SEC << "s" << std::endl;
+    std::cout << "Total epochs to full learn: " << perceptron.getTotalEpochs() << std::endl;
 
     std::cout << "Weights: ";
     for (int i{0}; i < 5; ++i)
