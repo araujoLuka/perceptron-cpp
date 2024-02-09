@@ -18,21 +18,21 @@ This program implements a Perceptron and a SIMD-optimized Perceptron (Perceptron
 
 2. **Navigate to the project directory:**
    ```bash
-   $ cd <project_directory>
+   $ cd perceptron-cpp/
    ```
 
    - Use your terminal to go to the project directory.
 
 3. **Compile the program:**
    ```bash
-   $ g++ -o perceptron_main perceptron_main.cpp Perceptron.cpp PerceptronSIMD.cpp -std=c++11
+   $ make
    ```
 
-   - Compile the program using a C++ compiler with support for C++11 or later.
+   - Compile the program using make.
 
 4. **Run the executable:**
    ```bash
-   $ ./perceptron_main [seed]
+   $ ./perceptron [seed]
    ```
 
    - Run the executable file, optionally providing a seed as the first command-line argument.
