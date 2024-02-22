@@ -2,53 +2,72 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <string>
 #include <vector>
 
 #include "Perceptron.hpp"
 #include "PerceptronSIMD.hpp"
 
-static const char *const FILE_NAME{"./data/iris.data"};
-static constexpr float LEARNING_RATE{0.1};
-
 void printHelp() {
     std::cout << "Usage: ./program [seed]" << std::endl;
     std::cout << "  seed: Optional seed for random number generation. If not "
                  "provided, default seed is used."
+              << "\n\n"
+              << "Description: " << std::endl
+              << "  Reads a dataset from a file and trains a "
+                 "  perceptron using the given data. "
               << std::endl;
 }
 
-void readData(const std::string &fileName,
-              std::vector<std::vector<float>> &data, std::vector<int> &labels) {
+void readData(std::vector<std::vector<float>> &data, std::vector<int> &labels,
+              int features) {
+    std::string fileName, label1{""}, label2{""};
+    int intances{0};
+
+    std::cout << "File name: ";
+    std::cin >> fileName;
+
     std::ifstream file(fileName);
     if (!file.is_open()) {
         std::cerr << "Could not open file " << fileName << std::endl;
         return;
     }
+
     std::string line;
     while (std::getline(file, line)) {
         if (line.empty()) break;
         std::vector<float> d;
         std::string value;
         std::stringstream ss(line);
-        for (int i{0}; i < 4; ++i) {
+        for (int i{0}; i < features; ++i) {
             std::getline(ss, value, ',');
             d.push_back(std::stof(value));
         }
         std::getline(ss, value);
-        if (value == "Iris-setosa")
+        if (label1.empty()) {
+            label1 = value;
+            std::cout << "Label 1: " << label1 << std::endl;
+        }
+        else if (label2.empty() && value != label1) {
+            label2 = value;
+            std::cout << "Label 2: " << label2 << std::endl;
+        }
+        if (value == label1)
             labels.push_back(1);
-        else if (value == "Iris-versicolor")
+        else if (value == label2)
             labels.push_back(-1);
         else
-            break;
+            continue;
         data.push_back(d);
+        ++intances;
     }
     file.close();
+    std::cout << "Read " << intances << " instances" << std::endl;
 }
 
-void generateWeights(int seed, std::vector<float> &weights) {
+void generateWeights(int seed, std::vector<float> &weights, int features) {
     srand(seed);
-    for (int i{0}; i < 4; ++i)
+    for (int i{0}; i < features; ++i)
         weights[i] = static_cast<float>(rand()) / RAND_MAX;
 }
 
@@ -60,29 +79,50 @@ int main(int argc, char *argv[]) {
             if (arg == "-h" || arg == "--help") {
                 printHelp();
                 return 0;
-            } 
+            }
         }
         seed = std::stoi(argv[1]);
     }
 
-    std::vector<std::vector<float>> *trainingData{
-        new std::vector<std::vector<float>>};
-    std::vector<int> *labels{new std::vector<int>};
     std::chrono::time_point<std::chrono::system_clock> time;
 
-    readData(FILE_NAME, *trainingData, *labels);
+    int features;
+    float learningRate;
+    std::string label1, label2;
 
-    std::cout << "Training data: " << trainingData->size() << std::endl;
-    std::cout << "Labels: " << labels->size() << std::endl;
+    std::cout << "Features: ";
+    std::cin >> features;
+    std::cout << "Learning rate: ";
+    std::cin >> learningRate;
 
-    std::vector<float> weights(4);
-    generateWeights(seed, weights);
+    std::vector<std::vector<float>> *trainingData =
+        new std::vector<std::vector<float>>();
+    std::vector<int> *labels = new std::vector<int>();
 
-    ml::Perceptron perceptron{LEARNING_RATE, 4, weights};
-    ml::PerceptronSIMD perceptronSIMD{LEARNING_RATE, 4, weights};
+    readData(*trainingData, *labels, features);
 
-    std::cout << "Learning rate: " << LEARNING_RATE << std::endl;
-    std::cout << "Input size: " << 4 << std::endl;
+    std::vector<float> weights(features);
+    std::cout << "Seed: " << seed << std::endl;
+    std::cout << "Generate random weights? [y/n]: ";
+    char answer;
+    std::cin >> answer;
+    if (answer == 'y') {
+        generateWeights(seed, weights, features);
+        std::cout << "Bias weight: " << weights[0] << std::endl;
+        std::cout << "Weights: ";
+        for (int i{1}; i < features; ++i) std::cout << weights[i] << " ";
+        std::cout << std::endl;
+    }
+    else {
+        std::cout << "Bias weight: ";
+        std::cin >> weights[0];
+        std::cout << "Enter '" << features << "' weights: ";
+        for (int i{1}; i < features; ++i) std::cin >> weights[i];
+    }
+
+    ml::Perceptron perceptron{learningRate, features, weights};
+    ml::PerceptronSIMD perceptronSIMD{learningRate, features, weights};
+
     std::cout << "---" << std::endl;
 
     std::cout << "Serial perceptron:" << std::endl;
@@ -116,7 +156,8 @@ int main(int argc, char *argv[]) {
               << perceptronSIMD.getTotalEpochs() << std::endl;
     std::cout << "> Weights: \n\t";
     std::cout << perceptronSIMD.getBiasWeight() << " ";
-    for (int i{0}; i < 4; ++i) std::cout << perceptronSIMD.getWeights()[i] << " ";
+    for (int i{0}; i < 4; ++i)
+        std::cout << perceptronSIMD.getWeights()[i] << " ";
     std::cout << std::endl;
 
     std::cout << "---" << std::endl;
