@@ -1,11 +1,12 @@
 parametrosCompilacao=-Wall -O3 -msse3
 nomePrograma=perceptron
-objetos=$(patsubst %.cpp, %.o, $(wildcard *.cpp))
+# all cpp files except main.cpp
+objetos=$(patsubst %.cpp,%.o,$(filter-out main.cpp,$(wildcard *.cpp)))
 
 all: $(nomePrograma)
 
-$(nomePrograma): $(objetos)
-	g++ -o $(nomePrograma) $(objetos) $(parametrosCompilacao)
+$(nomePrograma): $(objetos) main.cpp
+	g++ -o $(nomePrograma) $? $(parametrosCompilacao)
 
 %.o: %.cpp
 	g++ -c $< $(parametrosCompilacao)
