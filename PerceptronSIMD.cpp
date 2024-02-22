@@ -16,12 +16,10 @@ PerceptronSIMD::PerceptronSIMD(const float learningRate, const int inputSize)
                                    (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX);
 }
 
-PerceptronSIMD::PerceptronSIMD(const float learningRate, const int inputSize, const int seed)
+PerceptronSIMD::PerceptronSIMD(const float learningRate, const int inputSize, const std::vector<float>& weights)
     : learningRate{learningRate}, inputSize{inputSize}, totalEpochs{0}, biasWeight{0.f} {
-    // Initialize weights with random values between 0 and 1 using a seed for reproducibility
-    srand(seed);
-    this->weightsSIMD = _mm_set_ps((float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX,
-                                   (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX);
+    // Initialize weights with the given values
+    this->weightsSIMD = _mm_load_ps(&weights[0]);
 }
 
 // Getters

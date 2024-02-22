@@ -1,3 +1,4 @@
+#include <array>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -7,7 +8,7 @@
 #include "PerceptronSIMD.hpp"
 
 static const char *const FILE_NAME{"./data/iris.data"};
-static constexpr float LEARNING_RATE{1};
+static constexpr float LEARNING_RATE{0.01};
 
 void printHelp() {
     std::cout << "Usage: ./program [seed]" << std::endl;
@@ -15,7 +16,7 @@ void printHelp() {
 }
 
 int main(int argc, char *argv[]) {
-    int seed{0};
+    int seed{static_cast<int>(time(nullptr))};
     if (argc > 1) {
         if (std::string{argv[1]} == "-h" || std::string{argv[1]} == "--help") {
             printHelp();
@@ -69,8 +70,13 @@ int main(int argc, char *argv[]) {
     std::cout << "Training data: " << trainingData->size() << std::endl;
     std::cout << "Labels: " << labels->size() << std::endl;
 
-    ml::Perceptron perceptron{LEARNING_RATE, 4, seed};
-    ml::PerceptronSIMD perceptronSIMD{LEARNING_RATE, 4, seed};
+    srand(seed);
+    std::vector<float> weights{4, 0};
+    for (int i{0}; i < 4; ++i)
+        weights[i] = static_cast<float>(rand()) / RAND_MAX;
+
+    ml::Perceptron perceptron{LEARNING_RATE, 4, weights};
+    ml::PerceptronSIMD perceptronSIMD{LEARNING_RATE, 4, weights};
 
     std::cout << "Learning rate: " << LEARNING_RATE << std::endl;
     std::cout << "Input size: " << 4 << std::endl;
@@ -80,12 +86,13 @@ int main(int argc, char *argv[]) {
     // Measure the time it takes to fit the perceptron with chrono
     time = std::chrono::system_clock::now();
     perceptron.fit(*trainingData, *labels, 1000); // 1000 epochs
-    float elapsedTime = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - time).count();
+    int timeP1 = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - time).count();
 
-    std::cout << "Time: " << elapsedTime << "ns" << std::endl;
+    std::cout << "Time: " << timeP1 << "ns" << std::endl;
     std::cout << "Total epochs to full learn: " << perceptron.getTotalEpochs() << std::endl;
     std::cout << "Weights: ";
-    for (int i{0}; i < 5; ++i)
+    std::cout << perceptron.getBiasWeight() << " ";
+    for (int i{0}; i < 4; ++i)
         std::cout << perceptron.getWeights()[i] << " ";
 
     std::cout << std::endl;
@@ -100,15 +107,34 @@ int main(int argc, char *argv[]) {
     std::cout << "Training perceptron SIMD..." << std::endl;
     time = std::chrono::system_clock::now();
     perceptronSIMD.fit(*trainingData, *labels, 1000); // 1000 epochs
-    elapsedTime = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - time).count();
+    int timeP2 = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - time).count();
 
-    std::cout << "Time: " << elapsedTime << "ns" << std::endl;
+    std::cout << "Time: " << timeP2 << "ns" << std::endl;
     std::cout << "Total epochs to full learn: " << perceptronSIMD.getTotalEpochs() << std::endl;
     std::cout << "Weights: ";
     std::cout << perceptronSIMD.getBiasWeight() << " ";
     for (int i{0}; i < 4; ++i)
         std::cout << perceptronSIMD.getWeights()[i] << " ";
     std::cout << std::endl;
+
+    std::cout << "Prediction: " << perceptron.predict(std::vector<float>{5.1, 3.5, 1.4, 0.2}) << std::endl;
+    std::cout << "Correct: 1" << std::endl;
+    std::cout << "Prediction: " << perceptron.predict(std::vector<float>{5.9, 3.0, 5.1, 1.8}) << std::endl;
+    std::cout << "Correct: -1" << std::endl;
+
+    std::cout << "---" << std::endl;
+
+    // Show the time difference between the two perceptrons
+    // How much SIMD is faster than the scalar version in percentage
+    if (timeP1 > timeP2) {
+        std::cout << "Time difference: " << timeP1 - timeP2 << "ns" << std::endl;
+        std::cout << "SIMD is " << (float)timeP1 / timeP2 * 100 << "% faster than scalar" << std::endl;
+    }
+    else {
+        std::cout << "Time difference: " << timeP2 - timeP1 << "ns" << std::endl;
+        std::cout << "SIMD failed to be faster than scalar" << std::endl;
+        std::cout << "Scalar is " << (float)timeP2 / timeP1 * 100 << "% faster than SIMD" << std::endl;
+    }
 
     delete trainingData;
     delete labels;

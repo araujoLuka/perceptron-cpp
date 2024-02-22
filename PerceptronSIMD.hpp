@@ -5,7 +5,7 @@
 #ifndef PERCEPTRON_SIMD_HPP
 #define PERCEPTRON_SIMD_HPP
 
-#include "Perceptron.hpp"
+#include <vector>
 #include <immintrin.h>
 
 namespace ml {
@@ -13,7 +13,7 @@ namespace ml {
 class PerceptronSIMD {
 public:
     PerceptronSIMD(const float learningRate, const int inputSize);
-    PerceptronSIMD(const float learningRate, const int inputSize, const int seed);
+    PerceptronSIMD(const float learningRate, const int inputSize, const std::vector<float>& weights);
     virtual ~PerceptronSIMD() = default;
 
     // Getters

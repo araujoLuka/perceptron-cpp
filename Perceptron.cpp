@@ -10,33 +10,33 @@
 namespace ml {
 
 Perceptron::Perceptron(const float learningRate, const int inputSize)
-    : learningRate{learningRate}, inputSize{inputSize}, totalEpochs{0} {
+    : learningRate{learningRate}, inputSize{inputSize}, totalEpochs{0}, biasWeight{0.f} {
     // Initialize weights with random values between 0 and 1
-    for (int i{0}; i < inputSize + 1; ++i) 
-        this->weights.push_back(static_cast<float>(rand()) / static_cast<float>(RAND_MAX));
+    for (int i{0}; i < this->inputSize; ++i)
+        this->weights.push_back((float)rand() / (float)RAND_MAX);
 }
 
-Perceptron::Perceptron(const float learningRate, const int inputSize, const int seed)
-    : learningRate{learningRate}, inputSize{inputSize}, totalEpochs{0} {
-    // Initialize weights with random values between 0 and 1 using the provided seed for reproducibility
-    srand(seed);
-    for (int i{0}; i < inputSize + 1; ++i) 
-        this->weights.push_back(static_cast<float>(rand()) / static_cast<float>(RAND_MAX));
+Perceptron::Perceptron(const float learningRate, const int inputSize, const std::vector<float>& weights)
+    : learningRate{learningRate}, inputSize{inputSize}, totalEpochs{0}, biasWeight{0.f} {
+    // Initialize weights with the given values
+    for (int i{0}; i < this->inputSize; ++i)
+        this->weights.push_back(weights[i]);
 }
 
 const std::vector<float> Perceptron::getWeights() { return this->weights; }
 const float Perceptron::getLearningRate() { return this->learningRate; }
 const int Perceptron::getInputSize() { return this->inputSize; }
 const int Perceptron::getTotalEpochs() { return this->totalEpochs; }
+const float Perceptron::getBiasWeight() { return this->biasWeight; }
 
 const float Perceptron::activation(const std::vector<float>& input) {
-    float scalarProduct = this->weights[0]; // Initialize with the bias
+    float scalarProduct{0.f};
 
     // Calculate the scalar product of inputs and weights
     for (int i{0}; i < this->inputSize; ++i) 
-        scalarProduct += input[i] * this->weights[i + 1];
+        scalarProduct += input[i] * this->weights[i];
 
-    return scalarProduct;
+    return scalarProduct + this->biasWeight;
 }
 
 const int Perceptron::predict(const std::vector<float>& input) { 
@@ -52,7 +52,9 @@ void Perceptron::fit(const std::vector<std::vector<float>>& trainingData, const 
         // Visualize the training process
         std::cout << "Epoch: " << epoch + 1 << '/' << epochs << " | ";
         std::cout << "Initial weights: ";
-        for (int i{0}; i <= this->inputSize; ++i)
+        std::cout << std::fixed << std::setw(9) << std::setprecision(5) 
+            << this->biasWeight << ' ';
+        for (int i{0}; i < this->inputSize; ++i)
             std::cout << std::fixed << std::setw(9) << std::setprecision(5) 
                 << this->weights[i] << ' ';
         std::cout << "| ";
@@ -71,15 +73,17 @@ void Perceptron::fit(const std::vector<std::vector<float>>& trainingData, const 
                 // We can multiply the learning rate by the label, and the operation will be inverted to the correct one
                 // If the label is 1, the learning rate will be positive; otherwise, it will be negative
                 float learningRate{this->learningRate * label};
-                this->weights[0] += learningRate;
+                this->biasWeight += learningRate;
                 for (int j{0}; j < this->inputSize; ++j)
-                    this->weights[j + 1] += learningRate * trainingData[i][j];
+                    this->weights[j] += learningRate * trainingData[i][j];
             }
         }
         // Visualize the training process
         std::cout << "Misclassified: " << misclassifiedCount << " | ";
         std::cout << "Final weights: ";
-        for (int i{0}; i <= this->inputSize; ++i)
+        std::cout << std::fixed << std::setw(9) << std::setprecision(5) 
+            << this->biasWeight << ' ';
+        for (int i{0}; i < this->inputSize; ++i)
             std::cout << std::fixed << std::setw(9) << std::setprecision(5) 
                 << this->weights[i] << ' ';
         std::cout << "\n";
