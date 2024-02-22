@@ -11,6 +11,9 @@ $(nomePrograma): $(objetos) main.cpp
 %.o: %.cpp
 	g++ -c $< $(parametrosCompilacao)
 
+debug: parametrosCompilacao+=-DDEBUG -g
+debug: all
+
 clean:
 	rm -f *.o
 
